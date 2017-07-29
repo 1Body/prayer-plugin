@@ -8,13 +8,17 @@ class IdeaBox extends React.Component {
  this.handleIdeaUpdate = this.handleIdeaUpdate.bind(this);
  }
  loadIdeasFromServer() {
-   axios.get(this.props.url)
+   // axios.get(this.props.url)
+   axios.get('http://localhost:8888/wp-json/prayer/v1/prayer')
     .then(res => {
+      console.log('hi')
+      console.log(res.data, 'res')
       this.setState({
         data: res.data
       })
     })
     .catch(function (error) {
+      console.log('hello error')
       console.log(error);
     });
  }

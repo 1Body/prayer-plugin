@@ -1,0 +1,208 @@
+<?php
+/*
+Plugin Name: PrayerList Plugin
+Description: React.JS Prayers in WordPress!
+Author: Alice
+Author URI: aplai168@gmail.com
+*/
+global $wpdb;
+$posts = $wpdb->get_results("SELECT ID, post_title FROM $wpdb->posts WHERE post_status = 'publish'
+AND post_type='post' ORDER BY comment_count DESC LIMIT 0,4");
+$prayercards = $wpdb->get_results("SELECT * FROM prayer_cards WHERE id = 1", OBJECT);
+$results = $wpdb->get_results( 'SELECT * FROM wp_options WHERE option_id = 1', OBJECT );
+   // Echo the title of the first scheduled post
+   echo $posts[0]->post_title;
+	 echo $prayercards[0]->name;
+	 echo $results[0]->option_name;
+
+	 add_action( 'wp_ajax_my_action', 'my_action' );
+	 function my_action() {
+	 	global $wpdb;
+		$posts = $wpdb->get_results("SELECT ID, post_title FROM $wpdb->posts WHERE post_status = 'publish'
+		AND post_type='post' ORDER BY comment_count DESC LIMIT 0,4");
+	         echo $posts[0]->post_title;
+	 	wp_die();
+	 }
+
+	 <?php
+	 add_action( 'admin_footer', 'my_action_javascript' ); // Write our JS below here
+
+	 function my_action_javascript() { ?>
+	 	<script type="text/javascript" >
+	 	jQuery(document).ready(function($) {
+
+	 		var data = {
+	 			'action': 'my_action',
+	 			'whatever': 1234
+	 		};
+
+	 		// since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
+	 		jQuery.post(ajaxurl, data, function(response) {
+	 			alert('Got this from the server: ' + response);
+	 		});
+	 	});
+	 	</script> <?php
+	 }
+
+// TODO:
+// 	 add_action( 'wp_ajax_spyr_plugin_do_ajax_request', 'spyr_plugin_do_ajax_request' );
+// 	 add_action( 'wp_ajax_nopriv_spyr_plugin_do_ajax_request', 'spyr_plugin_do_ajax_request' );
+//
+// 	 // Add script on single post only, if user has Admin rights
+// 	 add_action( 'template_redirect', 'spyr_add_js_single_posts' );
+// 	 function spyr_add_js_single_posts() {
+// 	 	// We only want to add the script if is_single()
+// 	 	// and can manage options (Admins)
+// 	 	if( is_single() && current_user_can( 'manage_options' ) ) {
+//
+// 	 		// Get the Path to this plugin's folder
+// 	 		$path = plugin_dir_url( __FILE__ );
+//
+// 	 		// Enqueue our script
+// 	 		wp_enqueue_script( 'spyr_ajax_delete_posts',
+// 	 							$path. 'js/ajax-delete-posts.js',
+// 	 							array( 'jquery' ),
+// 	 							'1.0.0', true );
+//
+// 	 		// Get the protocol of the current page
+// 	 		$protocol = isset( $_SERVER['HTTPS'] ) ? 'https://' : 'http://';
+//
+// 	 		// Set the ajaxurl Parameter which will be output right before
+// 	 		// our ajax-delete-posts.js file so we can use ajaxurl
+// 	 		$params = array(
+// 	 			// Get the url to the admin-ajax.php file using admin_url()
+// 	 			'ajaxurl' => admin_url( 'admin-ajax.php', $protocol ),
+// 	 		);
+// 	 		// Print the script to our page
+// 	 		wp_localize_script( 'spyr_ajax_delete_posts', 'spyr_params', $params );
+// 	 	}
+// 	 }
+// 	 // Add an admin link to each post
+// add_filter( 'the_content', 'spyr_add_content_delete_link' );
+// function spyr_add_content_delete_link( $content ) {
+// 	if( is_single() && current_user_can( 'manage_options' ) ) {
+// 		// Get current post
+// 		global $post;
+//
+// 		// Create a nonce for this action
+// 		$nonce = wp_create_nonce( 'spyr_adp-delete-' . $post->ID );
+// 		// Get link to adminn page to trash the post and add nonces to it
+// 		$link = '<a href="'. admin_url( 'post.php?post='. $post->ID .'&action=trash&nonce=' .$nonce ) .'"
+// 				class="spyr_adp_link" data-nonce="'. $nonce .'" data-id="'. $post->ID .'">Delete Post</a>';
+//
+// 		// Append link to content
+// 		return $content . '<p>'. $link .'</p>';
+// 	}
+// }
+//
+// // Ajax Handler
+// add_action( 'wp_ajax_spyr_adp_ajax_delete_post', 'spyr_adp_ajax_delete_post' );
+// function spyr_adp_ajax_delete_post() {
+// 	// Get the Post ID from the URL
+// 	$pid = $_REQUEST['pid'];
+//
+// 	// Instantiate WP_Ajax_Response
+// 	$response = new WP_Ajax_Response;
+//
+// 	// Proceed, again we are checking for permissions
+// 	if( current_user_can( 'manage_options' ) &&
+// 		// Verify Nonces
+// 		wp_verify_nonce( $_REQUEST['nonce'], 'spyr_adp-delete-' . $pid ) &&
+// 		// Delete the post
+// 		wp_delete_post( $pid ) ) {
+// 		// Build the response if successful
+// 		$response->add( array(
+// 			'data'	=> 'success',
+// 			'supplemental' => array(
+// 				'pid' => $pid,
+// 				'message' => 'This post has been deleted',
+// 			),
+// 		) );
+// 	} else {
+// 		// Build the response if an error occurred
+// 		$response->add( array(
+// 			'data'	=> 'error',
+// 			'supplemental' => array(
+// 				'pid' => $pid,
+// 				'message' => 'Error deleting this post ('. $pid .')',
+// 			),
+// 		) );
+// 	}
+// 	// Whatever the outcome, send the Response back
+// 	$response->send();
+//
+// 	// Always exit when doing Ajax
+// 	exit();
+// }
+
+// TODO:
+	//  function my_enqueue_assets() {
+	// 	 <script type='text/javascript'>
+	// 		/* <![CDATA[ */
+	// 		var ajaxpagination = {"ajaxurl":"http:\/\/wordpress.local\/wp-admin\/admin-ajax.php"};
+	// 		/* ]]> */
+	// 		</script>
+	//      wp_enqueue_style( 'parent-style', get_template_directory_uri().'/style.css' );
+	//      wp_enqueue_script( 'ajax-pagination',  get_stylesheet_directory_uri() . '/js/ajax-pagination.js', array( 'jquery' ), '1.0', true );
+	// 		 wp_localize_script( 'ajax-pagination', 'ajaxpagination', array(
+	// 		 	'ajaxurl' => admin_url( 'admin-ajax.php' )
+	// 		 ));
+	//  }
+
+
+
+// wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/config/core.php' );
+// wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/category/read.php' );
+// wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/config/database.php' );
+// wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/objects/category.php' );
+// wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/objects/product.php' );
+// wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/product/create.php' );
+// wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/product/delete.php' );
+// wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/product/read_one.php' );
+// wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/product/read_paging.php' );
+// wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/product/read.php' );
+// wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/product/search.php' );
+// wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/product/update.php' );
+// wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/shared/utilities.php' );
+add_shortcode( 'prayer', 'prayer_function' );
+function prayer_function() {
+	return '<div id="quiz">here is the prayer plugin</div>';
+}
+
+add_action( 'wp_enqueue_scripts', 'wpshout_react_quiz_enqueue_scripts' );
+function wpshout_react_quiz_enqueue_scripts() {
+	// if( ! is_single( 10742 ) ) {
+	// 	return;
+	// }
+
+	wp_enqueue_script( 'react', plugin_dir_url( __FILE__ ) . 'react/build/react.js' );
+	wp_enqueue_script( 'react-dom', plugin_dir_url( __FILE__ ) . 'react/build/react-dom.min.js' );
+	wp_enqueue_script( 'babel', 'https://npmcdn.com/babel-core@5.8.38/browser.min.js', '', null, false );
+	wp_enqueue_script( 'style', plugin_dir_url( __FILE__ ) . 'src/style.js' );
+	wp_enqueue_script( 'quiz', plugin_dir_url( __FILE__ ) . 'src/index.js' );
+	wp_enqueue_script( 'axios', plugin_dir_url( __FILE__ ) . 'node_modules/axios/dist/axios.js' );
+	wp_enqueue_script( 'marked', plugin_dir_url( __FILE__ ) . 'node_modules/marked/marked.min.js' );
+	wp_enqueue_script( 'material-ui', plugin_dir_url( __FILE__ ) . 'node_modules/material-ui/RaisedButton/RaisedButton.js' );
+
+	// wp_enqueue_script( 'ChromePhp', plugin_dir_url( __FILE__ ) . 'ChromePhp.php' );
+
+	// wp_enqueue_script( 'react-flexbox-grid', plugin_dir_url( __FILE__ ) . 'node_modules/react-flexbox-grid/lib/components/Grid.js' );
+	// wp_enqueue_script( 'react-flexbox-col', plugin_dir_url( __FILE__ ) . 'node_modules/react-flexbox-grid/lib/components/Col.js' );
+	// wp_enqueue_script( 'react-flexbox-row', plugin_dir_url( __FILE__ ) . 'node_modules/react-flexbox-grid/lib/components/Row.js' );
+
+
+	wp_enqueue_style( 'quiz', plugin_dir_url( __FILE__ ) . 'src/prayer.css' );
+	wp_enqueue_style( 'quiz', plugin_dir_url( __FILE__ ) . 'src/index.css' );
+	wp_enqueue_style( 'quiz', plugin_dir_url( __FILE__ ) . 'src/App.css' );
+}
+
+// Add "babel" type to quiz script
+add_filter( 'script_loader_tag', 'wpshout_react_quiz_add_babel_type', 10, 3 );
+function wpshout_react_quiz_add_babel_type( $tag, $handle, $src ) {
+	if ( $handle !== 'quiz' ) {
+		return $tag;
+	}
+
+	return '<script src="' . $src . '" type="text/babel"></script>' . "\n";
+
+}

@@ -5,31 +5,72 @@ Description: React.JS Prayers in WordPress!
 Author: Alice
 Author URI: aplai168@gmail.com
 */
+error_log(print_r($v, TRUE), 3, '/var/tmp/errors.log');
+
 global $wpdb;
 $posts = $wpdb->get_results("SELECT ID, post_title FROM $wpdb->posts WHERE post_status = 'publish'
 AND post_type='post' ORDER BY comment_count DESC LIMIT 0,4");
 $prayercards = $wpdb->get_results("SELECT * FROM prayer_cards WHERE id = 1", OBJECT);
 $results = $wpdb->get_results( 'SELECT * FROM wp_options WHERE option_id = 1', OBJECT );
    // Echo the title of the first scheduled post
-   echo $posts[0]->post_title;
-	 echo $prayercards[0]->name;
-	 echo $results[0]->option_name;
+  //  echo $posts[0]->post_title;
+	//  echo $prayercards[0]->name;
+	//  echo $results[0]->option_name;
+
+	 add_action( 'wp_ajax_my_action', 'my_action' );
+	 function my_action() {
+	 	global $wpdb;
+		$posts = $wpdb->get_results("SELECT ID, post_title FROM $wpdb->posts WHERE post_status = 'publish'
+		AND post_type='post' ORDER BY comment_count DESC LIMIT 0,4");
+	         echo $posts[0]->post_title;
+	 	wp_die();
+	 }
+
+	 /**
+	  * Grab latest post title by an author!
+	  *
+	  * @param array $data Options for the function.
+	  * @return string|null Post title for the latest,  * or null if none.
+	  */
+	 function my_awesome_func( $data ) {
+	 	$posts = get_posts( array(
+	 		'author' => $data['id'],
+	 	) );
+
+	 	if ( empty( $posts ) ) {
+			return new WP_Error( 'awesome_no_author', 'Invalid author', array( 'status' => 404 ) );
+	 	}
+
+	 	return $posts[0]->post_title;
+	 }
+
+	 function get_prayers( $data ) {
+		 global $wpdb;
+		 $prayercards1 = $wpdb->get_results("SELECT * FROM prayer_cards WHERE id = 1", OBJECT);
+		 if ( empty($prayercards1)) {
+			 return new WP_Error( 'no_prayers', 'no prayers', array('status' => 404));
+		 }
+		//  return $prayercards1[0]->name;
+		 return $prayercards1;
+	 }
+	 add_action( 'rest_api_init', function () {
+		 register_rest_route( 'prayer/v1', '/name', array(
+		// 	register_rest_route( 'myplugin/v1', '/author/(?P<id>\d+)', array(
+	 		'methods' => 'GET',
+	 		'callback' => 'my_awesome_func',
+	 	) );
+		register_rest_route('prayer/v1', 'prayer', array(
+			'methods' => 'GET',
+			'callback' => 'get_prayers',
+		));
+	 } );
 
 
-wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/config/core.php' );
 
-wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/category/read.php' );
-wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/config/database.php' );
-wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/objects/category.php' );
-wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/objects/product.php' );
-wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/product/create.php' );
-wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/product/delete.php' );
-wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/product/read_one.php' );
-wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/product/read_paging.php' );
-wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/product/read.php' );
-wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/product/search.php' );
-wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/product/update.php' );
-wp_enqueue_script( 'read.php', plugin_dir_url( __FILE__ ) . 'api/shared/utilities.php' );
+
+
+
+
 add_shortcode( 'prayer', 'prayer_function' );
 function prayer_function() {
 	return '<div id="quiz">here is the prayer plugin</div>';
