@@ -5,7 +5,10 @@
 5. node server.js in a terminal to activate API.
 
 **DATABASE**
-to access MYSQL, we will use the WP-API.
+to access MYSQL
+
+on php, create my databases.
+create an endpoint in php to grab certain things from the database which i can access from the front end.
 
 **UI**
 

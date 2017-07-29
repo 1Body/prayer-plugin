@@ -4,6 +4,9 @@
 /node_modules
 /public/lib
 /bower_components
+/api
+/chromephp
+
 
 # testing
 /coverage
