@@ -24,14 +24,16 @@ class IdeaBox extends React.Component {
     });
  }
  handleIdeaSubmit(idea) {
+    console.log(idea, 'idea to post')
    let ideas = this.state.data;
    ideas.id = Date.now();
    console.log(ideas, 'ideas')
    let newIdeas = ideas.concat([idea]);
    this.setState({ data: newIdeas });
-    axios.post(this.props.url, idea)
+   axios.post('http://localhost:8888/wp-json/prayer/v1/prayer', idea)
    .catch(err => {
-      console.error(err);
+      console.log(idea, 'idea')
+      console.error(err, 'error in post');
       this.setState({ data: ideas });
    });
    console.log('this is working')
@@ -111,9 +113,10 @@ class IdeaList extends React.Component {
 class IdeaForm extends React.Component {
  constructor(props) {
  super(props);
-    this.state = { name: '', prayer_request: '' };
+    this.state = { name: '', email: '', prayer_request: '' };
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleprayer_requestChange = this.handleprayer_requestChange.bind(this);
+    this.handleEmailChange = this.handleEmailChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
  }
  handleNameChange(e) {
@@ -122,15 +125,19 @@ class IdeaForm extends React.Component {
  handleprayer_requestChange(e) {
     this.setState({ prayer_request: e.target.value });
  }
+ handleEmailChange(e) {
+    this.setState({ email: e.target.value });
+ }
  handleSubmit(e) {
     e.preventDefault();
     let name = this.state.name.trim();
     let prayer_request = this.state.prayer_request.trim();
-    if (!prayer_request || !name) {
+    let email = this.state.email.trim();
+    if (!prayer_request || !name || !email) {
        return;
     }
-    this.props.onIdeaSubmit({ name: name, prayer_request: prayer_request });
-    this.setState({ name: '', prayer_request: '' });
+    this.props.onIdeaSubmit({ name: name, email: email, prayer_request: prayer_request });
+    this.setState({ name: '', email: '', prayer_request: '' });
  }
  render() {
     return (
@@ -139,12 +146,18 @@ class IdeaForm extends React.Component {
 You may add your prayer request to our prayer wall using the form below. Once your prayer request is received, we will share it according to your instructions. Feel free to submit as many prayer requests as you like!
     <input
     id="name"
-    type='prayer_request'
+    type='name'
     placeholder='Your name'
     style={ style.ideaFormName}
     value={ this.state.name }
     onChange={ this.handleNameChange } />
-    <input placeholder="Your Email"/>
+    <input
+    id="email"
+    type='email'
+    placeholder='Your Email'
+   //  style={ style.ideaFormemail}
+    value={ this.state.email }
+    onChange={ this.handleEmailChange } />
     <input placeholder="Your Phone"/>
     <select>
         <option value="">Share this</option>
@@ -176,6 +189,7 @@ class Idea extends React.Component {
      this.state= {
        toBeUpdated: false,
        name: '',
+       email: '',
        prayer_request: ''
    };
  //binding all our functions to this class
@@ -183,6 +197,7 @@ class Idea extends React.Component {
  this.updateIdea = this.updateIdea.bind(this);
  this.handleNameChange = this.handleNameChange.bind(this);
  this.handleprayer_requestChange = this.handleprayer_requestChange.bind(this);
+ this.handleEmailChange = this.handleEmailChange.bind(this);
  this.handleIdeaUpdate = this.handleIdeaUpdate.bind(this);
  }
  updateIdea(e) {
@@ -197,11 +212,13 @@ class Idea extends React.Component {
     //request will ignore it.
     let name = (this.state.name) ? this.state.name : null;
     let prayer_request = (this.state.prayer_request) ? this.state.prayer_request : null;
-    let idea = { name: name, prayer_request: prayer_request};
+    let email = (this.state.email) ? this.state.email : null;
+    let idea = { name: name, email: email, prayer_request: prayer_request};
     this.props.onIdeaUpdate(id, idea);
     this.setState({
        toBeUpdated: !this.state.toBeUpdated,
        name: '',
+       email: '',
        prayer_request: ''
     })
  }
@@ -216,6 +233,9 @@ class Idea extends React.Component {
  }
  handleNameChange(e) {
     this.setState({ name: e.target.value });
+ }
+ handleEmailChange(e) {
+    this.setState({ email: e.target.value });
  }
  rawMarkup() {
     let rawMarkup = marked(this.props.children.toString());

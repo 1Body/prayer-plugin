@@ -46,12 +46,33 @@ $results = $wpdb->get_results( 'SELECT * FROM wp_options WHERE option_id = 1', O
 
 	 function get_prayers( $data ) {
 		 global $wpdb;
-		 $prayercards1 = $wpdb->get_results("SELECT * FROM prayer_cards WHERE id = 1", OBJECT);
+		 $prayercards1 = $wpdb->get_results("SELECT * FROM prayer_cards", OBJECT);
 		 if ( empty($prayercards1)) {
 			 return new WP_Error( 'no_prayers', 'no prayers', array('status' => 404));
 		 }
-		//  return $prayercards1[0]->name;
 		 return $prayercards1;
+	 }
+	 function post_prayers( $data ) {
+		 	global $wpdb;
+			$name = $data['name'];
+			$email = $data['email'];
+			$prayer_request = $data['prayer_request'];
+			echo $name;
+	 		$item = $wpdb->insert("prayer_cards", array(
+			   "name" => $name,
+			   "email" => $email,
+			   "prayer_request" => $prayer_request,
+			));
+			// $item = $this->prepare_item_for_database( $request );
+
+			if ( function_exists( 'slug_some_function_to_create_item')  ) {
+				$data1 = slug_some_function_to_create_item( $item );
+				if ( is_array( $data1 ) ) {
+					return new WP_REST_Response( $data1, 201 );
+				}
+			}
+
+			return new WP_Error( 'cant-create', __( 'message', 'text-domain'), array( 'status' => 500 ) );
 	 }
 	 add_action( 'rest_api_init', function () {
 		 register_rest_route( 'prayer/v1', '/name', array(
@@ -62,6 +83,10 @@ $results = $wpdb->get_results( 'SELECT * FROM wp_options WHERE option_id = 1', O
 		register_rest_route('prayer/v1', 'prayer', array(
 			'methods' => 'GET',
 			'callback' => 'get_prayers',
+		));
+		register_rest_route('prayer/v1', 'prayer', array(
+			'methods' => 'POST',
+			'callback' => 'post_prayers',
 		));
 	 } );
 
