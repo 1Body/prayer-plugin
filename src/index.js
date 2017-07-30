@@ -8,11 +8,12 @@ class IdeaBox extends React.Component {
  this.handleIdeaUpdate = this.handleIdeaUpdate.bind(this);
  }
  loadIdeasFromServer() {
+
    // axios.get(this.props.url)
    axios.get('http://localhost:8888/wp-json/prayer/v1/prayer')
     .then(res => {
       console.log('hi')
-      console.log(res.data, 'res')
+      console.log(res.data, 'res.data')
       this.setState({
         data: res.data
       })
@@ -93,7 +94,7 @@ class IdeaList extends React.Component {
                 onIdeaUpdate={ this.props.onIdeaUpdate }
                 key={idea['_id']}
                 >
-               { idea.content }
+               { idea.prayer_request }
               </Idea>
 
         </div>
@@ -110,26 +111,26 @@ class IdeaList extends React.Component {
 class IdeaForm extends React.Component {
  constructor(props) {
  super(props);
-    this.state = { name: '', content: '' };
+    this.state = { name: '', prayer_request: '' };
     this.handleNameChange = this.handleNameChange.bind(this);
-    this.handleContentChange = this.handleContentChange.bind(this);
+    this.handleprayer_requestChange = this.handleprayer_requestChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
  }
  handleNameChange(e) {
     this.setState({ name: e.target.value });
  }
- handleContentChange(e) {
-    this.setState({ content: e.target.value });
+ handleprayer_requestChange(e) {
+    this.setState({ prayer_request: e.target.value });
  }
  handleSubmit(e) {
     e.preventDefault();
     let name = this.state.name.trim();
-    let content = this.state.content.trim();
-    if (!content || !name) {
+    let prayer_request = this.state.prayer_request.trim();
+    if (!prayer_request || !name) {
        return;
     }
-    this.props.onIdeaSubmit({ name: name, content: content });
-    this.setState({ name: '', content: '' });
+    this.props.onIdeaSubmit({ name: name, prayer_request: prayer_request });
+    this.setState({ name: '', prayer_request: '' });
  }
  render() {
     return (
@@ -138,7 +139,7 @@ class IdeaForm extends React.Component {
 You may add your prayer request to our prayer wall using the form below. Once your prayer request is received, we will share it according to your instructions. Feel free to submit as many prayer requests as you like!
     <input
     id="name"
-    type='content'
+    type='prayer_request'
     placeholder='Your name'
     style={ style.ideaFormName}
     value={ this.state.name }
@@ -154,12 +155,12 @@ You may add your prayer request to our prayer wall using the form below. Once yo
    <label for="">Email me when someone prays</label>
 
     <input
-    id="content"
-    type='content'
+    id="prayer_request"
+    type='prayer_request'
     placeholder='Prayer Request'
-    style={ style.ideaFormContent}
-    value={ this.state.content }
-    onChange={ this.handleContentChange } />
+    style={ style.ideaFormprayer_request}
+    value={ this.state.prayer_request }
+    onChange={ this.handleprayer_requestChange } />
     <input type='submit'
     style={ style.ideaFormPost }
     label="Post"/>
@@ -175,13 +176,13 @@ class Idea extends React.Component {
      this.state= {
        toBeUpdated: false,
        name: '',
-       content: ''
+       prayer_request: ''
    };
  //binding all our functions to this class
  this.deleteIdea = this.deleteIdea.bind(this);
  this.updateIdea = this.updateIdea.bind(this);
  this.handleNameChange = this.handleNameChange.bind(this);
- this.handleContentChange = this.handleContentChange.bind(this);
+ this.handleprayer_requestChange = this.handleprayer_requestChange.bind(this);
  this.handleIdeaUpdate = this.handleIdeaUpdate.bind(this);
  }
  updateIdea(e) {
@@ -192,16 +193,16 @@ class Idea extends React.Component {
  handleIdeaUpdate(e) {
     e.preventDefault();
     let id = this.props.uniqueID;
-    //if name or content changed, set it. if not, leave null and our PUT
+    //if name or prayer_request changed, set it. if not, leave null and our PUT
     //request will ignore it.
     let name = (this.state.name) ? this.state.name : null;
-    let content = (this.state.content) ? this.state.content : null;
-    let idea = { name: name, content: content};
+    let prayer_request = (this.state.prayer_request) ? this.state.prayer_request : null;
+    let idea = { name: name, prayer_request: prayer_request};
     this.props.onIdeaUpdate(id, idea);
     this.setState({
        toBeUpdated: !this.state.toBeUpdated,
        name: '',
-       content: ''
+       prayer_request: ''
     })
  }
  deleteIdea(e) {
@@ -210,8 +211,8 @@ class Idea extends React.Component {
     this.props.onIdeaDelete(id);
     console.log('oops deleted', id);
  }
- handleContentChange(e) {
-    this.setState({ content: e.target.value });
+ handleprayer_requestChange(e) {
+    this.setState({ prayer_request: e.target.value });
  }
  handleNameChange(e) {
     this.setState({ name: e.target.value });
@@ -231,17 +232,17 @@ class Idea extends React.Component {
                        { (this.state.toBeUpdated)
                        ? (<form onSubmit={ this.handleIdeaUpdate }>
                        <input
-                       type='content'
+                       type='prayer_request'
                        placeholder='Update name…'
                        style={ style.ideaFormName }
                        value={ this.state.name }
                        onChange= { this.handleNameChange } />
                        <input
-                       type='content'
+                       type='prayer_request'
                        placeholder='Update your idea…'
-                       style= { style.ideaFormContent }
-                       value={ this.state.content }
-                       onChange={ this.handleContentChange } />
+                       style= { style.ideaFormprayer_request }
+                       value={ this.state.prayer_request }
+                       onChange={ this.handleprayer_requestChange } />
                        <input
                        type='submit'
                        style={ style.ideaFormPost }
